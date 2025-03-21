@@ -19,16 +19,28 @@ namespace SauceDemoUITests.Pages
         public void EnterUsername(string username) => driver.FindElement(usernameField).SendKeys(username);
         public void EnterPassword(string password) => driver.FindElement(passwordField).SendKeys(password);
         public void ClickLogin() => driver.FindElement(loginButton).Click();
+
         public string GetErrorMessage()
         {
             return driver.FindElements(errorMessage).Count > 0
                 ? driver.FindElement(errorMessage).Text
                 : string.Empty;
         }
+
+        public void ClearUsername() => driver.FindElement(usernameField).Clear();
+        public void ClearPassword()
+        {
+            var element = driver.FindElement(passwordField);
+            element.Clear();
+            element.SendKeys(Keys.Control + "a" + Keys.Delete);
+        }
+
         public void ClearFields()
         {
-            driver.FindElement(usernameField).Clear();
-            driver.FindElement(passwordField).Clear();
+            ClearUsername();
+            ClearPassword();
         }
+
+        public string GetPageTitle() => driver.Title;
     }
 }

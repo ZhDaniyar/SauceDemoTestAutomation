@@ -1,8 +1,8 @@
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
 
 namespace SauceDemoUITests.Drivers
 {
@@ -10,22 +10,47 @@ namespace SauceDemoUITests.Drivers
     {
         public static IWebDriver CreateDriver(string browser)
         {
-            switch (browser.ToLower())
+            if (browser.Equals("chrome", StringComparison.OrdinalIgnoreCase))
             {
-                case "chrome":
-                    new DriverManager().SetUpDriver(new ChromeConfig());
-                    var chromeOptions = new ChromeOptions();
-                    chromeOptions.AddArgument("--start-maximized");
-                    return new ChromeDriver(chromeOptions);
+                new DriverManager().SetUpDriver(new ChromeConfig());
+                return new ChromeDriver();
+            }
+            else if (browser.Equals("edge", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
 
-                case "edge":
-                    new DriverManager().SetUpDriver(new EdgeConfig());
                     var edgeOptions = new EdgeOptions();
-                    edgeOptions.AddArgument("--start-maximized");
-                    return new EdgeDriver(edgeOptions);
 
-                default:
-                    throw new ArgumentException($"Browser {browser} is not supported.");
+                    edgeOptions.AddArgument("--ignore-certificate-errors");
+
+                    var service = EdgeDriverService.CreateDefaultService();
+
+
+                    return new EdgeDriver(service, edgeOptions);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to initialize Edge driver with options: {ex.Message}");
+
+                    Console.WriteLine("Attempting direct Edge driver initialization...");
+
+                    try
+                    {
+                        return new EdgeDriver();
+                    }
+                    catch (Exception innerEx)
+                    {
+                        Console.WriteLine($"All Edge driver initialization attempts failed: {innerEx.Message}");
+                        Console.WriteLine("Please install Microsoft Edge WebDriver from:");
+                        Console.WriteLine("https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/");
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Unsupported browser: {browser}");
             }
         }
     }
